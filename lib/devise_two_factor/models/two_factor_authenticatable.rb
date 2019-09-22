@@ -22,7 +22,7 @@ module Devise
       end
 
       def self.required_fields(klass)
-        [:encrypted_otp_secret, :encrypted_otp_secret_iv, :encrypted_otp_secret_salt, :consumed_timestep]
+        [:encrypted_otp_secret, :encrypted_otp_secret_iv, :encrypted_otp_secret_salt, :otp_consumed_at]
       end
 
       # This defaults to the model's otp_secret
@@ -32,8 +32,7 @@ module Devise
         return false unless code.present? && otp_secret.present?
 
         totp = self.otp(otp_secret)
-        @consume_otp_time = totp.verify(code, drift_ahead: self.class.otp_allowed_drift, drift_behind: self.class.otp_allowed_drift)
-        return consume_otp! if @consume_otp_time
+        return consume_otp! if totp.verify(code, drift_ahead: self.class.otp_allowed_drift, drift_behind: self.class.otp_allowed_drift)
 
         false
       end
@@ -65,8 +64,8 @@ module Devise
       # An OTP cannot be used more than once in a given timestep
       # Storing timestep of last valid OTP is sufficient to satisfy this requirement
       def consume_otp!
-        if self.consumed_timestep != current_otp_timestep
-          self.consumed_timestep = current_otp_timestep
+        if self.otp_consumed_at != current_otp_timestep
+          self.otp_consumed_at = current_otp_timestep
           return save(validate: false)
         end
 

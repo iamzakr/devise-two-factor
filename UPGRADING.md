@@ -25,7 +25,7 @@ Pull request #43 added a new field to protect against "shoulder-surfing" attacks
 ```ruby
 class AddConsumedTimestepToUsers < ActiveRecord::Migration
   def change
-    add_column :users, :consumed_timestep, :integer
+    add_column :users, :otp_consumed_at, :integer
   end
 end
 ```

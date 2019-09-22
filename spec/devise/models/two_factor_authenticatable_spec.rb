@@ -10,7 +10,7 @@ class TwoFactorAuthenticatableDouble
 
   devise :two_factor_authenticatable, :otp_secret_encryption_key => 'test-key'*4
 
-  attr_accessor :consumed_timestep
+  attr_accessor :otp_consumed_at
 
   def save(validate)
     # noop for testing
@@ -35,7 +35,7 @@ class TwoFactorAuthenticatableWithCustomizeAttrEncryptedDouble
 
   devise :two_factor_authenticatable, :otp_secret_encryption_key => 'test-key'*4
 
-  attr_accessor :consumed_timestep
+  attr_accessor :otp_consumed_at
 
   def save(validate)
     # noop for testing
@@ -59,7 +59,7 @@ describe ::Devise::Models::TwoFactorAuthenticatable do
 
     before :each do
       subject.otp_secret = subject.class.generate_otp_secret
-      subject.consumed_timestep = nil
+      subject.otp_consumed_at = nil
     end
 
     describe 'otp_secret options' do

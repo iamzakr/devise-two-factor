@@ -1,12 +1,12 @@
 RSpec.shared_examples 'two_factor_authenticatable' do
   before :each do
     subject.otp_secret = subject.class.generate_otp_secret
-    subject.consumed_timestep = nil
+    subject.otp_consumed_at = nil
   end
 
   describe 'required_fields' do
     it 'should have the attr_encrypted fields for otp_secret' do
-      expect(Devise::Models::TwoFactorAuthenticatable.required_fields(subject.class)).to contain_exactly(:encrypted_otp_secret, :encrypted_otp_secret_iv, :encrypted_otp_secret_salt, :consumed_timestep)
+      expect(Devise::Models::TwoFactorAuthenticatable.required_fields(subject.class)).to contain_exactly(:encrypted_otp_secret, :encrypted_otp_secret_iv, :encrypted_otp_secret_salt, :otp_consumed_at)
     end
   end
 
@@ -40,28 +40,28 @@ RSpec.shared_examples 'two_factor_authenticatable' do
       Timecop.return
     end
 
-    context 'with a stored consumed_timestep' do
+    context 'with a stored otp_consumed_at' do
       context 'given a precisely correct OTP' do
-        let(:consumed_otp) { ROTP::TOTP.new(otp_secret).at(Time.now) }
+        let(:otp_consumed_at) { ROTP::TOTP.new(otp_secret).at(Time.now) }
 
         before do
-          subject.validate_and_consume_otp!(consumed_otp)
+          subject.validate_and_consume_otp!(otp_consumed_at)
         end
 
         it 'fails to validate' do
-          expect(subject.validate_and_consume_otp!(consumed_otp)).to be false
+          expect(subject.validate_and_consume_otp!(otp_consumed_at)).to be false
         end
       end
 
       context 'given a previously valid OTP within the allowed drift' do
-        let(:consumed_otp) { ROTP::TOTP.new(otp_secret).at(Time.now + subject.class.otp_allowed_drift) }
+        let(:otp_consumed_at) { ROTP::TOTP.new(otp_secret).at(Time.now + subject.class.otp_allowed_drift) }
 
         before do
-          subject.validate_and_consume_otp!(consumed_otp)
+          subject.validate_and_consume_otp!(otp_consumed_at)
         end
 
         it 'fails to validate' do
-          expect(subject.validate_and_consume_otp!(consumed_otp)).to be false
+          expect(subject.validate_and_consume_otp!(otp_consumed_at)).to be false
         end
       end
     end
