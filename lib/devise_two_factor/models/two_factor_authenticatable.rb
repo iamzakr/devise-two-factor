@@ -18,7 +18,7 @@ module Devise
             :mode => :per_attribute_iv_and_salt unless self.attr_encrypted?(:otp_secret)
         end
 
-        attr_accessor :otp_attempt
+        attr_accessor :otp_attempt, :otp_consumed_at
       end
 
       def self.required_fields(klass)
